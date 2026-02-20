@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablir contrasenya - Cremes Sóller</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background-color: {{bgColor}};
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 450px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: {{textColor}};
+      font-size: 24px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .subtitle {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .hint {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      background-color: {{textColor}};
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Restablir contrasenya</h1>
+    <p class="subtitle">Introdueix la teva nova contrasenya</p>
+    {{errorBlock}}
+    <form method="POST" action="{{actionUrl}}">
+      <input type="hidden" name="token" value="{{token}}">
+      <div class="form-group">
+        <label for="newPassword">Nova contrasenya</label>
+        <input type="password" id="newPassword" name="newPassword" required minlength="6" placeholder="Mínim 6 caràcters">
+        <p class="hint">La contrasenya ha de tenir almenys 6 caràcters</p>
+      </div>
+      <button type="submit">Restablir contrasenya</button>
+    </form>
+    <div class="footer">Cremes Sóller © 2026</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  name         String
+  surname      String
+  phone        String
+  passwordHash String
+  isVerified   Boolean       @default(false)
+  isBO         Boolean       @default(false)
+
+  reservations            Reservation[]
+  notifications           Notification[]
+  pushTokens              PushToken[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+}
+
+model Activity {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+
+  sessions Session[]
+}
+
+model Instructor {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+  phone String
+
+  sessions Session[]
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  activityId   Int
+  instructorId Int
+  date         DateTime @db.Date
+  startTime    String
+  endTime      String
+
+  activity     Activity      @relation(fields: [activityId], references: [id])
+  instructor   Instructor    @relation(fields: [instructorId], references: [id])
+  reservations Reservation[]
+
+  @@index([activityId])
+  @@index([instructorId])
+  @@index([date])
+}
+
+model Reservation {
+  id           Int               @id @default(autoincrement())
+  userId       Int
+  sessionId    Int
+  observations String?
+  state        ReservationStatus @default(PENDING)
+
+  user    User    @relation(fields: [userId], references: [id])
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  text      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model PushToken {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  token  String
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model Layer {
+  id        Int    @id @default(autoincrement())
+  latitude  Float
+  longitude Float
+  zone      String
+}

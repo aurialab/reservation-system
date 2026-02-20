@@ -1,0 +1,4765 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Reservation System API",
+    "version": "1.0.0",
+    "description": "Reservation System API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "name": "Swagger API Team",
+      "url": "http://swagger.io",
+      "email": "apiteam@swagger.io"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "summary": "Login user",
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description": "User authenticated"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "Unauthorized Example": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Credencials invàlides."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email o contrasenya incorrectes"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                }
+              }
+            },
+            "description": "Format d'email invàlid o camps buits."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                }
+              }
+            },
+            "description": "Massa intents fallits"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "EMAIL_NOT_VERIFIED": {
+                    "value": {
+                      "error": "EMAIL_NOT_VERIFIED",
+                      "message": "El correu electrònic no ha estat verificat. Revisa la teva bústia."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email no verificat"
+          }
+        },
+        "description": "Autentica l'usuari mitjançant credencials (Email/Password). Si les dades són vàlides, el servei genera i retorna un JSON Web Token (JWT) que el client haurà d'incloure en la capçalera Authorization per a les peticions protegides (com la reserva d'activitats). El sistema valida les credencials contra la base de dades xifrada."
+      }
+    },
+    "/auth/password-reset": {
+      "post": {
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Password"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FORMAT_EMAIL": {
+                    "value": {
+                      "error": "INVALID_FORMAT",
+                      "message": "L'email no té un format correcte."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Format d'email invàlid o camps buits."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Credencials invàlides."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email o contrasenya incorrecte"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "BRUTE_FORCE_BLOCK": {
+                    "value": {
+                      "error": "BRUTE_FORCE_BLOCK",
+                      "message": "Massa intents. Prova-ho més tard."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Massa intents fallits"
+          }
+        },
+        "description": "L'usuari podrà recuperar la contrasenya introduït el correu electrònic que va introduir quan es va crear el compte. Si el correu electrònic existeix el servidor l'enviarà un correu amb un enllaç per recuperar. En ambos casos la resposta serà ok per seguretat."
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "requestBody": {
+          "description": "Token de reset i nova contrasenya",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Contrasenya actualitzada correctament"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                }
+              }
+            },
+            "description": "Token invàlid o la contrasenya no compleix els requisits"
+          }
+        },
+        "description": "Permet a l'usuari establir una nova contrasenya utilitzant el token rebut per email.",
+        "operationId": "postAuthResetPassword"
+      }
+    },
+    "/auth/verify-email": {
+      "get": {
+        "operationId": "getAuthVerifyEmail",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token de verificació rebut per email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email verificat correctament"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                }
+              }
+            },
+            "description": "Token invàlid o expirat"
+          }
+        },
+        "description": "Verifica l'adreça d'email de l'usuari utilitzant el token rebut."
+      }
+    },
+    "/auth/resend-verification": {
+      "post": {
+        "operationId": "postAuthResendVerification",
+        "requestBody": {
+          "description": "Email de l'usuari",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Solicitud procesada (respuesta genérica por seguridad)"
+          }
+        },
+        "description": "Reenvia l'email de verificació. Sempre retorna èxit per prevenir enumeració d'emails."
+      }
+    },
+    "/me": {
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "User info"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "User authenticated"
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "user deleted"
+          }
+        },
+        "summary": "Delete User"
+      }
+    },
+    "/me/notifications": {
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Notification"
+                  }
+                }
+              }
+            },
+            "description": "All user notifications\n"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "All user notifications"
+      }
+    },
+    "/layers": {
+      "summary": "Capes del mapa",
+      "description": "On estarà l'informació sobre si en la posició actual que està l'usuari és una zona rústica o no",
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Layer"
+                  }
+                }
+              }
+            },
+            "description": "All layers map"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "verificationEmailSent": {
+                      "type": "boolean",
+                      "description": "Indica si s'ha enviat l'email de verificació"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "User registered"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_INPUT": {
+                    "value": {
+                      "error": "INVALID_INPUT",
+                      "message": "L'email no té un format correcte."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Format d'email invàlid o camps buits."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Credencials invàlides."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email o contrasenya incorrecte"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "BRUTE_FORCE_BLOCK": {
+                    "value": {
+                      "error": "BRUTE_FORCE_BLOCK",
+                      "message": "Massa intents. Prova-ho més tard."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Massa intents fallits"
+          }
+        }
+      }
+    },
+    "/reservations": {
+      "get": {
+        "parameters": [
+          {
+            "name": "user_id",
+            "description": "Filter by UserId",
+            "schema": {
+              "type": "number"
+            },
+            "in": "query"
+          },
+          {
+            "name": "status",
+            "description": "Filter By Status",
+            "schema": {
+              "type": "string"
+            },
+            "in": "query"
+          },
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reservation"
+                  }
+                }
+              }
+            },
+            "description": "All reservations"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "Paràmetres incorrectes"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Filtres incorrectes o data invalida."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "L'usuari no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari no existeix"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Get All Reservations",
+        "description": "Només per BO?"
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "Valid Token User or Superuser",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                }
+              }
+            },
+            "description": "New booking"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "Paràmetres incorrectes"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Filtres incorrectes o data invalida."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "L'usuari no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari no existeix"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Create Booking"
+      }
+    },
+    "/me/reservations": {
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reservation"
+                  }
+                }
+              }
+            },
+            "description": "All users reservations"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "Data incorrecte"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Data incorrecte"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMeReservationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New booking"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "Data incorrecte"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Data incorrecte"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Notification"
+                }
+              }
+            },
+            "description": "All notifications"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "All Notifications"
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Notification created\n"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Send Notifications"
+      }
+    },
+    "/me/notifications/token": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token Saved"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "description": "Guarda el token de firebase a la DB, per així després poder enviar notificacions push."
+      }
+    },
+    "/users": {
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "Get all users"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Només per BO"
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "headers": {
+              "Token": {}
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Get user"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FORMAT": {
+                    "description": "Format invàlid o camps buits.",
+                    "value": {
+                      "error": "INVALID_FORMAT",
+                      "message": "Falten camps per omplir"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Format invàlid o camps buits."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "description": "Token invàlid o caducat",
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "description": "L'usuari que esta realitzant la petició no te permisos de BO",
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "description": "No existeix el usuari",
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "El usuari no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix el usuari"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "CONFLICT": {
+                    "description": "Email duplicat",
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "Ja existeix aquest emial"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email duplicat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "description": "Error intern del servidor",
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Només per BO"
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Updated user"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FORMAT": {
+                    "description": "Format invàlid o camps buits.",
+                    "value": {
+                      "error": "INVALID_FORMAT",
+                      "message": "Falten camps per omplir"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Format invàlid o camps buits."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "description": "Token invàlid o caducat",
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "description": "L'usuari que esta realitzant la petició no te permisos de BO",
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "description": "No existeix el usuari",
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "El usuari no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix el usuari"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "CONFLICT": {
+                    "description": "Email duplicat",
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "Ja existeix aquest emial"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email duplicat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "description": "Error intern del servidor",
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get user"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FORMAT": {
+                    "description": "Format invàlid o camps buits.",
+                    "value": {
+                      "error": "INVALID_FORMAT",
+                      "message": "Falten camps per omplir"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Format invàlid o camps buits."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "description": "Token invàlid o caducat",
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "description": "L'usuari que esta realitzant la petició no te permisos de BO",
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos."
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que esta realitzant la petició no te permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "description": "No existeix el usuari",
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "El usuari no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix el usuari"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "CONFLICT": {
+                    "description": "Email duplicat",
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "Ja existeix aquest emial"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Email duplicat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "description": "Error intern del servidor",
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "token",
+          "description": "",
+          "schema": {
+            "type": "string"
+          },
+          "in": "header",
+          "required": true
+        }
+      ]
+    },
+    "/setUserBo": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserBoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "Valid Token for BO user",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Usuario actualizado con rol BO"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FORMAT": {
+                    "value": {
+                      "error": "INVALID_FORMAT",
+                      "message": "Falten camps per omplir o format invàlid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Paràmetres invàlids o faltants"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid o caducat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "FORBIDDEN": {
+                    "value": {
+                      "error": "FORBIDDEN",
+                      "message": "No tens permisos de Back-Office"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "L'usuari que realitza la petició no té permisos de BO"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "El usuari no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Usuari no trobat"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Asignar o remover rol de Back-Office a un usuario",
+        "description": "Permite a los usuarios con permisos de BO asignar o remover el rol de Back-Office a otros usuarios"
+      }
+    },
+    "/reservations/{reservation_id}": {
+      "description": "Get Reservations by UserId",
+      "get": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "reservation_id",
+            "description": "Reservation Id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                }
+              }
+            },
+            "description": "Array of reservations"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "No existeix una reserva amb aquest id"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Id de la reserva és invàlid"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Get Reservation Information"
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReservationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "reservation_id",
+            "description": "Reservation Id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                },
+                "examples": {
+                  "Reservation": {
+                    "value": {
+                      "userId": 123,
+                      "date": "29/01/2026",
+                      "timeRange": {
+                        "id": 1,
+                        "label": "10:00-11:00"
+                      },
+                      "observations": "Some text",
+                      "State": {
+                        "Status": "PENDING"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "S'ha editat correctament la reserva."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "No existeix una reserva amb aquest id"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Id de la reserva és invàlid"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "description": "Primer comprova si la reserva existeix a la DB i esta associada al usuari que es vol editar la reserva. Un cop comprovat i es correcta la informació edita el contingut de la reserva amb les noves dades."
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "token",
+            "description": "",
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "reservation_id",
+            "description": "Reservation Id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted booking"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "INVALID_FILTER": {
+                    "value": {
+                      "error": "INVALID_FILTER",
+                      "message": "No existeix una reserva amb aquest id"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Id de la reserva és invàlid"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "AUTH_FAILED": {
+                    "value": {
+                      "error": "AUTH_FAILED",
+                      "message": "Token invalid"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Token invàlid o caducat"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": "NOT_FOUND",
+                      "message": "La reserva no existeix"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No existeix la reserva"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "NO_AVAILABILITY": {
+                    "value": {
+                      "error": "NO_AVAILABILITY",
+                      "message": "No hi ha disponibilitat"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "No hi ha més espais per fer reserva."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicError"
+                },
+                "examples": {
+                  "SERVER_ERROR": {
+                    "value": {
+                      "error": "SERVER_ERROR",
+                      "message": "Error intern del servidor"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Error intern del servidor"
+          }
+        },
+        "summary": "Delete Booking"
+      },
+      "parameters": [
+        {
+          "name": "reservation_id",
+          "description": "Reservation Id",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/auth/reset-password-form": {
+      "get": {
+        "operationId": "getAuthResetPasswordForm",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token de restabliment de contrasenya"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Formulari HTML per introduir nova contrasenya",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Token invàlid o expirat",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postAuthResetPasswordForm",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "token",
+                  "newPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contrasenya actualitzada (HTML)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error (HTML)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activities": {
+      "get": {
+        "operationId": "getActivities",
+        "summary": "List all activities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of activities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Activity"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postActivities",
+        "summary": "Create a new activity",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Activity created"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/activities/{activity_id}": {
+      "parameters": [
+        {
+          "name": "activity_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getActivitiesActivityId",
+        "summary": "Get an activity by ID",
+        "responses": {
+          "200": {
+            "description": "Activity found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Activity not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putActivitiesActivityId",
+        "summary": "Update an activity",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activity updated"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Activity not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteActivitiesActivityId",
+        "summary": "Delete an activity",
+        "responses": {
+          "200": {
+            "description": "Activity deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Activity not found"
+          }
+        }
+      }
+    },
+    "/instructors": {
+      "get": {
+        "operationId": "getInstructors",
+        "summary": "List all instructors",
+        "responses": {
+          "200": {
+            "description": "List of instructors"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postInstructors",
+        "summary": "Create a new instructor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "phone"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "phone": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Instructor created"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/instructors/{instructor_id}": {
+      "parameters": [
+        {
+          "name": "instructor_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getInstructorsInstructorId",
+        "summary": "Get an instructor by ID",
+        "responses": {
+          "200": {
+            "description": "Instructor found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Instructor not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putInstructorsInstructorId",
+        "summary": "Update an instructor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "phone": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Instructor updated"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Instructor not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteInstructorsInstructorId",
+        "summary": "Delete an instructor",
+        "responses": {
+          "200": {
+            "description": "Instructor deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Instructor not found"
+          }
+        }
+      }
+    },
+    "/sessions": {
+      "get": {
+        "operationId": "getSessions",
+        "summary": "List all sessions",
+        "parameters": [
+          {
+            "name": "activity_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "instructor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sessions"
+          },
+          "400": {
+            "description": "Invalid filters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postSessions",
+        "summary": "Create a new session",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "activityId",
+                  "instructorId",
+                  "date",
+                  "startTime",
+                  "endTime"
+                ],
+                "properties": {
+                  "activityId": {
+                    "type": "integer"
+                  },
+                  "instructorId": {
+                    "type": "integer"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "startTime": {
+                    "type": "string",
+                    "example": "09:00"
+                  },
+                  "endTime": {
+                    "type": "string",
+                    "example": "11:00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Session created"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/sessions/{session_id}": {
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getSessionsSessionId",
+        "summary": "Get a session by ID",
+        "responses": {
+          "200": {
+            "description": "Session found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putSessionsSessionId",
+        "summary": "Update a session",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "activityId": {
+                    "type": "integer"
+                  },
+                  "instructorId": {
+                    "type": "integer"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "startTime": {
+                    "type": "string"
+                  },
+                  "endTime": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session updated"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSessionsSessionId",
+        "summary": "Delete a session",
+        "responses": {
+          "200": {
+            "description": "Session deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Session not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "title": "Root Type for LoginBody",
+        "description": "",
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "test@test.com",
+          "password": "1234"
+        }
+      },
+      "SignUpRequest": {
+        "title": "Root Type for sign-up-body",
+        "description": "Sign up body",
+        "required": [
+          "password",
+          "email",
+          "name",
+          "phone",
+          "surname"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "password": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "test@test.com",
+          "name": "Nom",
+          "surname": "Cognom",
+          "phone": "+34 666 555 444",
+          "password": "1234"
+        }
+      },
+      "User": {
+        "title": "Root Type for User",
+        "description": "",
+        "required": [
+          "name",
+          "surname",
+          "email",
+          "id",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "name": {
+            "description": "",
+            "type": "string"
+          },
+          "surname": {
+            "description": "",
+            "type": "string"
+          },
+          "isBO": {
+            "type": "boolean",
+            "description": "Indica si el usuario es un usuario de Back-Office"
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "Nom",
+          "surname": "Cognom",
+          "email": "test@test.com",
+          "phone": "+34 666 999 888",
+          "isBO": false
+        }
+      },
+      "Notification": {
+        "title": "Root Type for Notification",
+        "description": "",
+        "required": [
+          "created",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "created": "30-12-2025 9:11",
+          "text": "Some Text"
+        }
+      },
+      "NotificationRequest": {
+        "title": "Root Type for NotificationRequest",
+        "description": "",
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "users": {
+            "description": "Array of usersId",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "example": {
+          "text": "Some Text",
+          "users": [
+            1,
+            2
+          ]
+        }
+      },
+      "AirQuality": {
+        "title": "Root Type for AirQuality",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "airQuality": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "airQuality": "16 µg/m3"
+        }
+      },
+      "Schedule": {
+        "title": "Root Type for Schedule",
+        "description": "",
+        "required": [
+          "date",
+          "slots"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date",
+            "description": "",
+            "type": "string"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            },
+            "description": ""
+          }
+        },
+        "example": {
+          "date": "2026-01-05",
+          "notes": "Some text",
+          "slots": [
+            {
+              "timeRange": {
+                "id": 1,
+                "label": "09-12"
+              },
+              "currentReservations": 1,
+              "maxBurns": 3
+            }
+          ]
+        }
+      },
+      "MaxBurns": {
+        "title": "Root Type for MaxBurns",
+        "description": "Configuración de quemas máximas para una fecha específica",
+        "required": [
+          "date",
+          "burnsSlot"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha en formato ISO 8601 (YYYY-MM-DD)",
+            "example": "2026-02-05"
+          },
+          "burnsSlot": {
+            "description": "Lista de slots configurados para cada rango horario",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaxBurnSlot"
+            }
+          }
+        },
+        "example": {
+          "date": "2026-02-05",
+          "burnsSlot": [
+            {
+              "timeRange": {
+                "id": 1,
+                "label": "09-12"
+              },
+              "maxBurns": 4
+            },
+            {
+              "timeRange": {
+                "id": 2,
+                "label": "12-15"
+              },
+              "maxBurns": 10
+            },
+            {
+              "timeRange": {
+                "id": 3,
+                "label": "15-18"
+              },
+              "maxBurns": 6
+            },
+            {
+              "timeRange": {
+                "id": 4,
+                "label": "18-20"
+              },
+              "maxBurns": 8
+            }
+          ]
+        }
+      },
+      "Layer": {
+        "title": "Root Type for Layer",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "longitude": {
+            "format": "double",
+            "type": "number"
+          },
+          "zone": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "latitude": 41.2556,
+          "longitude": 2.8345,
+          "zone": "id_zone"
+        }
+      },
+      "Reservation": {
+        "description": "Booking burning",
+        "required": [
+          "userId",
+          "State",
+          "date",
+          "timeRange"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "format": "int32",
+            "type": "integer",
+            "description": "ID del usuario que realitzó la reserva"
+          },
+          "date": {
+            "format": "date",
+            "description": "",
+            "type": "string"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": ""
+          },
+          "user": {
+            "type": "object",
+            "description": "User that made the reservation",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "surname": {
+                "type": "string"
+              }
+            }
+          },
+          "observations": {
+            "description": "",
+            "type": "string"
+          },
+          "State": {
+            "$ref": "#/components/schemas/ReservationStatus",
+            "description": ""
+          }
+        }
+      },
+      "CreateReservationRequest": {
+        "title": "Root Type for CreateBookingRequest",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "userId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "timeRangeId": {
+            "format": "int32",
+            "type": "integer",
+            "description": "ID del rango horario"
+          },
+          "observations": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "userId": 1,
+          "date": "2026-01-30",
+          "timeRangeId": 2,
+          "observations": "some text"
+        }
+      },
+      "CreateMeReservationRequest": {
+        "title": "Root Type for CreateMeReservationRequest",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "timeRangeId": {
+            "format": "int32",
+            "type": "integer",
+            "description": "ID del rango horario"
+          },
+          "observations": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "date": "2026-01-30",
+          "timeRangeId": 2,
+          "observations": "some text"
+        }
+      },
+      "UpdateReservationRequest": {
+        "title": "Root Type for UpdateReservationRequest",
+        "description": "Request per actualitzar una reserva existente",
+        "type": "object",
+        "properties": {
+          "observations": {
+            "type": "string",
+            "description": "Observacions de la reserva"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "CANCELLED"
+            ],
+            "description": "Estat de la reserva"
+          }
+        },
+        "example": {
+          "observations": "new observations",
+          "status": "APPROVED"
+        }
+      },
+      "SetUserBoRequest": {
+        "title": "Root Type for SetUserBoRequest",
+        "description": "Request para asignar o remover el rol de Back-Office a un usuario",
+        "required": [
+          "userId",
+          "isBO"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "format": "int32",
+            "type": "integer",
+            "description": "ID del usuario"
+          },
+          "isBO": {
+            "type": "boolean",
+            "description": "Indica si el usuario debe ser asignado como usuario de Back-Office"
+          }
+        },
+        "example": {
+          "userId": 5,
+          "isBO": true
+        }
+      },
+      "ResetPassword": {
+        "title": "Root Type for ResetPasswordReset",
+        "description": "",
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "description": "Correu electrònic",
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "test@test.com"
+        }
+      },
+      "Weather": {
+        "title": "Root Type for Weather",
+        "description": "Weather prediction",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "origen": {
+              "type": "object",
+              "properties": {
+                "productor": {
+                  "type": "string"
+                },
+                "web": {
+                  "type": "string"
+                },
+                "enlace": {
+                  "type": "string"
+                },
+                "language": {
+                  "type": "string"
+                },
+                "copyright": {
+                  "type": "string"
+                },
+                "notaLegal": {
+                  "type": "string"
+                }
+              }
+            },
+            "elaborado": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "nombre": {
+              "type": "string"
+            },
+            "provincia": {
+              "type": "string"
+            },
+            "prediccion": {
+              "type": "object",
+              "properties": {
+                "dia": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "probPrecipitacion": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "format": "int32",
+                              "type": "integer"
+                            },
+                            "periodo": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "cotaNieveProv": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "periodo": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "estadoCielo": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "periodo": {
+                              "type": "string"
+                            },
+                            "descripcion": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "viento": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "direccion": {
+                              "type": "string"
+                            },
+                            "velocidad": {
+                              "format": "int32",
+                              "type": "integer"
+                            },
+                            "periodo": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "rachaMax": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "periodo": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "temperatura": {
+                        "type": "object",
+                        "properties": {
+                          "maxima": {
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "minima": {
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "dato": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": {
+                                  "format": "int32",
+                                  "type": "integer"
+                                },
+                                "hora": {
+                                  "format": "int32",
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "sensTermica": {
+                        "type": "object",
+                        "properties": {
+                          "maxima": {
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "minima": {
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "dato": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": {
+                                  "format": "int32",
+                                  "type": "integer"
+                                },
+                                "hora": {
+                                  "format": "int32",
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "humedadRelativa": {
+                        "type": "object",
+                        "properties": {
+                          "maxima": {
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "minima": {
+                            "format": "int32",
+                            "type": "integer"
+                          },
+                          "dato": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": {
+                                  "format": "int32",
+                                  "type": "integer"
+                                },
+                                "hora": {
+                                  "format": "int32",
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "uvMax": {
+                        "format": "int32",
+                        "type": "integer"
+                      },
+                      "fecha": {
+                        "format": "date-time",
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "id": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "version": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        },
+        "example": [
+          {
+            "origen": {
+              "productor": "Agencia Estatal de Meteorología - AEMET. Gobierno de España",
+              "web": "https://www.aemet.es",
+              "enlace": "https://www.aemet.es/es/eltiempo/prediccion/municipios/abrera-id08001",
+              "language": "es",
+              "copyright": "© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma.",
+              "notaLegal": "https://www.aemet.es/es/nota_legal"
+            },
+            "elaborado": "2026-01-30T10:36:09",
+            "nombre": "Abrera",
+            "provincia": "Barcelona",
+            "prediccion": {
+              "dia": [
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 0,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": 70,
+                      "periodo": "12-24"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "00-06"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "06-12"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "12-18"
+                    },
+                    {
+                      "value": 65,
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "1200",
+                      "periodo": "12-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-06"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "06-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-18"
+                    },
+                    {
+                      "value": "1300",
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "",
+                      "periodo": "00-24",
+                      "descripcion": ""
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12",
+                      "descripcion": ""
+                    },
+                    {
+                      "value": "44",
+                      "periodo": "12-24",
+                      "descripcion": "Nuboso con lluvia escasa"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-06",
+                      "descripcion": ""
+                    },
+                    {
+                      "value": "12",
+                      "periodo": "06-12",
+                      "descripcion": "Poco nuboso"
+                    },
+                    {
+                      "value": "14",
+                      "periodo": "12-18",
+                      "descripcion": "Nuboso"
+                    },
+                    {
+                      "value": "44n",
+                      "periodo": "18-24",
+                      "descripcion": "Nuboso con lluvia escasa"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "",
+                      "velocidad": 0,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "direccion": "",
+                      "velocidad": 0,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 25,
+                      "periodo": "12-24"
+                    },
+                    {
+                      "direccion": "C",
+                      "velocidad": 0,
+                      "periodo": "00-06"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 25,
+                      "periodo": "06-12"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 5,
+                      "periodo": "12-18"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 10,
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": "",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "40",
+                      "periodo": "12-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-06"
+                    },
+                    {
+                      "value": "40",
+                      "periodo": "06-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-18"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 16,
+                    "minima": 6,
+                    "dato": [
+                      {
+                        "value": 10,
+                        "hora": 6
+                      },
+                      {
+                        "value": 14,
+                        "hora": 12
+                      },
+                      {
+                        "value": 11,
+                        "hora": 18
+                      },
+                      {
+                        "value": 10,
+                        "hora": 24
+                      }
+                    ]
+                  },
+                  "sensTermica": {
+                    "maxima": 16,
+                    "minima": 6,
+                    "dato": [
+                      {
+                        "value": 10,
+                        "hora": 6
+                      },
+                      {
+                        "value": 14,
+                        "hora": 12
+                      },
+                      {
+                        "value": 11,
+                        "hora": 18
+                      },
+                      {
+                        "value": 10,
+                        "hora": 24
+                      }
+                    ]
+                  },
+                  "humedadRelativa": {
+                    "maxima": 80,
+                    "minima": 55,
+                    "dato": [
+                      {
+                        "value": 65,
+                        "hora": 6
+                      },
+                      {
+                        "value": 55,
+                        "hora": 12
+                      },
+                      {
+                        "value": 70,
+                        "hora": 18
+                      },
+                      {
+                        "value": 80,
+                        "hora": 24
+                      }
+                    ]
+                  },
+                  "uvMax": 2,
+                  "fecha": "2026-01-30T00:00:00"
+                },
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 55,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": 55,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "12-24"
+                    },
+                    {
+                      "value": 55,
+                      "periodo": "00-06"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "06-12"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "12-18"
+                    },
+                    {
+                      "value": 0,
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "1100",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-24"
+                    },
+                    {
+                      "value": "1200",
+                      "periodo": "00-06"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "06-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-18"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "43",
+                      "periodo": "00-24",
+                      "descripcion": "Intervalos nubosos con lluvia escasa"
+                    },
+                    {
+                      "value": "44",
+                      "periodo": "00-12",
+                      "descripcion": "Nuboso con lluvia escasa"
+                    },
+                    {
+                      "value": "11",
+                      "periodo": "12-24",
+                      "descripcion": "Despejado"
+                    },
+                    {
+                      "value": "44n",
+                      "periodo": "00-06",
+                      "descripcion": "Nuboso con lluvia escasa"
+                    },
+                    {
+                      "value": "14",
+                      "periodo": "06-12",
+                      "descripcion": "Nuboso"
+                    },
+                    {
+                      "value": "11",
+                      "periodo": "12-18",
+                      "descripcion": "Despejado"
+                    },
+                    {
+                      "value": "11n",
+                      "periodo": "18-24",
+                      "descripcion": "Despejado"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "O",
+                      "velocidad": 25,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 25,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "direccion": "NO",
+                      "velocidad": 35,
+                      "periodo": "12-24"
+                    },
+                    {
+                      "direccion": "NO",
+                      "velocidad": 15,
+                      "periodo": "00-06"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 25,
+                      "periodo": "06-12"
+                    },
+                    {
+                      "direccion": "NO",
+                      "velocidad": 35,
+                      "periodo": "12-18"
+                    },
+                    {
+                      "direccion": "S",
+                      "velocidad": 15,
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": "55",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "35",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "55",
+                      "periodo": "12-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-06"
+                    },
+                    {
+                      "value": "35",
+                      "periodo": "06-12"
+                    },
+                    {
+                      "value": "55",
+                      "periodo": "12-18"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "18-24"
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 14,
+                    "minima": 8,
+                    "dato": [
+                      {
+                        "value": 9,
+                        "hora": 6
+                      },
+                      {
+                        "value": 12,
+                        "hora": 12
+                      },
+                      {
+                        "value": 11,
+                        "hora": 18
+                      },
+                      {
+                        "value": 9,
+                        "hora": 24
+                      }
+                    ]
+                  },
+                  "sensTermica": {
+                    "maxima": 14,
+                    "minima": 5,
+                    "dato": [
+                      {
+                        "value": 7,
+                        "hora": 6
+                      },
+                      {
+                        "value": 12,
+                        "hora": 12
+                      },
+                      {
+                        "value": 11,
+                        "hora": 18
+                      },
+                      {
+                        "value": 7,
+                        "hora": 24
+                      }
+                    ]
+                  },
+                  "humedadRelativa": {
+                    "maxima": 80,
+                    "minima": 55,
+                    "dato": [
+                      {
+                        "value": 60,
+                        "hora": 6
+                      },
+                      {
+                        "value": 55,
+                        "hora": 12
+                      },
+                      {
+                        "value": 60,
+                        "hora": 18
+                      },
+                      {
+                        "value": 65,
+                        "hora": 24
+                      }
+                    ]
+                  },
+                  "uvMax": 1,
+                  "fecha": "2026-01-31T00:00:00"
+                },
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 10,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": 5,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": 5,
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "13",
+                      "periodo": "00-24",
+                      "descripcion": "Intervalos nubosos"
+                    },
+                    {
+                      "value": "13",
+                      "periodo": "00-12",
+                      "descripcion": "Intervalos nubosos"
+                    },
+                    {
+                      "value": "13",
+                      "periodo": "12-24",
+                      "descripcion": "Intervalos nubosos"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "O",
+                      "velocidad": 5,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "direccion": "S",
+                      "velocidad": 15,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "direccion": "O",
+                      "velocidad": 5,
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": "",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 16,
+                    "minima": 4,
+                    "dato": []
+                  },
+                  "sensTermica": {
+                    "maxima": 16,
+                    "minima": 4,
+                    "dato": []
+                  },
+                  "humedadRelativa": {
+                    "maxima": 80,
+                    "minima": 50,
+                    "dato": []
+                  },
+                  "uvMax": 2,
+                  "fecha": "2026-02-01T00:00:00"
+                },
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 100,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": 65,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": 100,
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "1800",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "1800",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "1700",
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "26",
+                      "periodo": "00-24",
+                      "descripcion": "Cubierto con lluvia"
+                    },
+                    {
+                      "value": "25",
+                      "periodo": "00-12",
+                      "descripcion": "Muy nuboso con lluvia"
+                    },
+                    {
+                      "value": "26",
+                      "periodo": "12-24",
+                      "descripcion": "Cubierto con lluvia"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "S",
+                      "velocidad": 10,
+                      "periodo": "00-24"
+                    },
+                    {
+                      "direccion": "S",
+                      "velocidad": 10,
+                      "periodo": "00-12"
+                    },
+                    {
+                      "direccion": "S",
+                      "velocidad": 10,
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": "",
+                      "periodo": "00-24"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "00-12"
+                    },
+                    {
+                      "value": "",
+                      "periodo": "12-24"
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 16,
+                    "minima": 5,
+                    "dato": []
+                  },
+                  "sensTermica": {
+                    "maxima": 16,
+                    "minima": 5,
+                    "dato": []
+                  },
+                  "humedadRelativa": {
+                    "maxima": 90,
+                    "minima": 70,
+                    "dato": []
+                  },
+                  "uvMax": 2,
+                  "fecha": "2026-02-02T00:00:00"
+                },
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 45
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "1100"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "13",
+                      "descripcion": "Intervalos nubosos"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "O",
+                      "velocidad": 10
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": ""
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 15,
+                    "minima": 5,
+                    "dato": []
+                  },
+                  "sensTermica": {
+                    "maxima": 15,
+                    "minima": 5,
+                    "dato": []
+                  },
+                  "humedadRelativa": {
+                    "maxima": 75,
+                    "minima": 45,
+                    "dato": []
+                  },
+                  "uvMax": 1,
+                  "fecha": "2026-02-03T00:00:00"
+                },
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 50
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "1100"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "45",
+                      "descripcion": "Muy nuboso con lluvia escasa"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "C",
+                      "velocidad": 0
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": ""
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 11,
+                    "minima": 4,
+                    "dato": []
+                  },
+                  "sensTermica": {
+                    "maxima": 11,
+                    "minima": 4,
+                    "dato": []
+                  },
+                  "humedadRelativa": {
+                    "maxima": 85,
+                    "minima": 60,
+                    "dato": []
+                  },
+                  "fecha": "2026-02-04T00:00:00"
+                },
+                {
+                  "probPrecipitacion": [
+                    {
+                      "value": 75
+                    }
+                  ],
+                  "cotaNieveProv": [
+                    {
+                      "value": "1700"
+                    }
+                  ],
+                  "estadoCielo": [
+                    {
+                      "value": "45",
+                      "descripcion": "Muy nuboso con lluvia escasa"
+                    }
+                  ],
+                  "viento": [
+                    {
+                      "direccion": "NO",
+                      "velocidad": 5
+                    }
+                  ],
+                  "rachaMax": [
+                    {
+                      "value": ""
+                    }
+                  ],
+                  "temperatura": {
+                    "maxima": 12,
+                    "minima": 3,
+                    "dato": []
+                  },
+                  "sensTermica": {
+                    "maxima": 12,
+                    "minima": 3,
+                    "dato": []
+                  },
+                  "humedadRelativa": {
+                    "maxima": 80,
+                    "minima": 75,
+                    "dato": []
+                  },
+                  "fecha": "2026-02-05T00:00:00"
+                }
+              ]
+            },
+            "id": 8001,
+            "version": 1
+          }
+        ]
+      },
+      "LoginResponse": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User",
+            "description": ""
+          },
+          "Authorization": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "example": {
+          "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+          "user": {
+            "id": 1,
+            "name": "Nom",
+            "surname": "Cognom",
+            "email": "test@test.com",
+            "phone": "+34 666 999 888"
+          }
+        }
+      },
+      "BasicError": {
+        "description": "",
+        "required": [
+          "error",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "description": "Descripció del error",
+            "type": "string"
+          },
+          "message": {
+            "description": "Text d'error",
+            "type": "string"
+          }
+        },
+        "example": {
+          "error": "INVALID_FORMAT",
+          "message": "L'email no és vàlid"
+        }
+      },
+      "TokenRequest": {
+        "description": "",
+        "required": [
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "example": {
+          "token": "eyJhbGci..."
+        }
+      },
+      "ReservationStatus": {
+        "description": "Enum",
+        "required": [
+          "Status"
+        ],
+        "type": "object",
+        "properties": {
+          "Status": {
+            "description": "",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED",
+              "CANCELLED"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "MaxBurnSlot": {
+        "description": "Slot de quemas máximas para un rango horario específico",
+        "required": [
+          "timeRange",
+          "maxBurns"
+        ],
+        "type": "object",
+        "properties": {
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "maxBurns": {
+            "description": "Número máximo de quemas para este rango",
+            "type": "number",
+            "example": 4
+          }
+        }
+      },
+      "ResetPasswordConfirm": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token rebut per email"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 6,
+            "description": "Nova contrasenya (mínim 6 caràcters)"
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
+        ]
+      },
+      "ResendVerificationRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "TimeRange": {
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID del rango horario"
+          },
+          "label": {
+            "type": "string",
+            "description": "Etiqueta del rango horario (ej: 09-12)",
+            "example": "09-12"
+          },
+          "startTime": {
+            "type": "string",
+            "nullable": true,
+            "description": "Hora d'inici del rang (hh:mm)",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "nullable": true,
+            "description": "Hora de fi del rang (hh:mm)",
+            "example": "12:00"
+          }
+        },
+        "example": {
+          "id": 1,
+          "label": "09-12",
+          "startTime": "09:00",
+          "endTime": "12:00"
+        }
+      },
+      "MaxBurnsPutRequest": {
+        "type": "object",
+        "required": [
+          "date",
+          "burnsSlot"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha en formato ISO 8601 (YYYY-MM-DD)",
+            "example": "2026-02-05"
+          },
+          "burnsSlot": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaxBurnSlot"
+            }
+          }
+        }
+      },
+      "Slot": {
+        "title": "Root Type for Slot",
+        "description": "Schedule slot",
+        "required": [
+          "timeRange",
+          "currentReservations",
+          "maxBurns"
+        ],
+        "type": "object",
+        "properties": {
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange",
+            "description": ""
+          },
+          "currentReservations": {
+            "description": "",
+            "type": "number"
+          },
+          "maxBurns": {
+            "description": "",
+            "type": "number"
+          }
+        },
+        "example": {
+          "timeRange": {
+            "id": 1,
+            "label": "09-12"
+          },
+          "currentReservations": 1,
+          "maxBurns": 3
+        }
+      }
+    }
+  }
+}
