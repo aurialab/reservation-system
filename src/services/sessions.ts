@@ -27,6 +27,7 @@ export type Session = {
   id: number;
   activityId: number;
   instructorId: number;
+  locationId: number;
   date: string;
   startTime: string;
   endTime: string;
@@ -37,6 +38,7 @@ export type Session = {
 export type CreateSessionPayload = {
   activityId: number;
   instructorId: number;
+  locationId: number;
   date: string;
   startTime: string;
   endTime: string;
@@ -45,6 +47,7 @@ export type CreateSessionPayload = {
 export type UpdateSessionPayload = {
   activityId?: number;
   instructorId?: number;
+  locationId?: number;
   date?: string;
   startTime?: string;
   endTime?: string;
@@ -55,6 +58,7 @@ function toSession(record: SessionRecord): Session {
     id: record.id,
     activityId: record.activityId,
     instructorId: record.instructorId,
+    locationId: record.locationId,
     date: record.date.toISOString().slice(0, 10),
     startTime: record.startTime,
     endTime: record.endTime,
@@ -107,6 +111,7 @@ export async function createSession(payload: CreateSessionPayload): Promise<Sess
   const input: CreateSessionInput = {
     activityId: payload.activityId,
     instructorId: payload.instructorId,
+    locationId: payload.locationId,
     date: parsedDate,
     startTime: payload.startTime,
     endTime: payload.endTime
@@ -127,6 +132,9 @@ export async function updateSession(
   }
   if (payload.instructorId !== undefined) {
     updateInput.instructorId = payload.instructorId;
+  }
+  if (payload.locationId !== undefined) {
+    updateInput.locationId = payload.locationId;
   }
   if (payload.date !== undefined) {
     const parsedDate = parseDate(payload.date);

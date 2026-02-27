@@ -96,6 +96,7 @@ function parseDateFilter(value: unknown): Date | null {
 function parseCreatePayload(payload: unknown): {
   activityId: number;
   instructorId: number;
+  locationId: number;
   date: string;
   startTime: string;
   endTime: string;
@@ -114,6 +115,10 @@ function parseCreatePayload(payload: unknown): {
     return null;
   }
 
+  if (typeof data.locationId !== "number" || !Number.isInteger(data.locationId) || data.locationId <= 0) {
+    return null;
+  }
+
   if (typeof data.date !== "string" || !data.date.trim()) {
     return null;
   }
@@ -129,6 +134,7 @@ function parseCreatePayload(payload: unknown): {
   return {
     activityId: data.activityId,
     instructorId: data.instructorId,
+    locationId: data.locationId,
     date: data.date.trim(),
     startTime: data.startTime.trim(),
     endTime: data.endTime.trim()
@@ -150,6 +156,7 @@ function parseUpdatePayload(payload: unknown): {
   const result: {
     activityId?: number;
     instructorId?: number;
+    locationId?: number;
     date?: string;
     startTime?: string;
     endTime?: string;
@@ -167,6 +174,13 @@ function parseUpdatePayload(payload: unknown): {
       return null;
     }
     result.instructorId = data.instructorId;
+  }
+
+  if (data.locationId !== undefined) {
+    if (typeof data.locationId !== "number" || !Number.isInteger(data.locationId) || data.locationId <= 0) {
+      return null;
+    }
+    result.locationId = data.locationId;
   }
 
   if (data.date !== undefined) {

@@ -2720,11 +2720,15 @@
                 "type": "object",
                 "required": [
                   "name",
+                  "surname",
                   "email",
                   "phone"
                 ],
                 "properties": {
                   "name": {
+                    "type": "string"
+                  },
+                  "surname": {
                     "type": "string"
                   },
                   "email": {
@@ -2789,6 +2793,9 @@
                 "type": "object",
                 "properties": {
                   "name": {
+                    "type": "string"
+                  },
+                  "surname": {
                     "type": "string"
                   },
                   "email": {
@@ -2898,6 +2905,7 @@
                 "required": [
                   "activityId",
                   "instructorId",
+                  "locationId",
                   "date",
                   "startTime",
                   "endTime"
@@ -2907,6 +2915,9 @@
                     "type": "integer"
                   },
                   "instructorId": {
+                    "type": "integer"
+                  },
+                  "locationId": {
                     "type": "integer"
                   },
                   "date": {
@@ -2981,6 +2992,9 @@
                   "instructorId": {
                     "type": "integer"
                   },
+                  "locationId": {
+                    "type": "integer"
+                  },
                   "date": {
                     "type": "string",
                     "format": "date"
@@ -3024,6 +3038,202 @@
           "404": {
             "description": "Session not found"
           }
+        }
+      }
+    },
+    "/businesses": {
+      "get": {
+        "operationId": "getBusinesses",
+        "summary": "List all businesses",
+        "responses": {
+          "200": { "description": "List of businesses" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "operationId": "postBusinesses",
+        "summary": "Create a new business",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE", "SUSPENDED"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Business created" },
+          "400": { "description": "Invalid payload" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/businesses/{business_id}": {
+      "parameters": [
+        { "name": "business_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+      ],
+      "get": {
+        "operationId": "getBusinessesBusinessId",
+        "summary": "Get a business by ID",
+        "responses": {
+          "200": { "description": "Business found" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Business not found" }
+        }
+      },
+      "put": {
+        "operationId": "putBusinessesBusinessId",
+        "summary": "Update a business",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE", "SUSPENDED"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Business updated" },
+          "400": { "description": "Invalid payload" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Business not found" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBusinessesBusinessId",
+        "summary": "Delete a business",
+        "responses": {
+          "200": { "description": "Business deleted" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Business not found" }
+        }
+      }
+    },
+    "/businesses/{business_id}/locations": {
+      "parameters": [
+        { "name": "business_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+      ],
+      "get": {
+        "operationId": "getBusinessesBusinessIdLocations",
+        "summary": "List all locations for a business",
+        "responses": {
+          "200": { "description": "List of locations" },
+          "400": { "description": "Invalid business ID" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/locations": {
+      "get": {
+        "operationId": "getLocations",
+        "summary": "List all locations",
+        "parameters": [
+          { "name": "business_id", "in": "query", "required": false, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "List of locations" },
+          "400": { "description": "Invalid filters" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "operationId": "postLocations",
+        "summary": "Create a new location",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "city", "postalCode", "address", "businessId"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "city": { "type": "string" },
+                  "postalCode": { "type": "string" },
+                  "address": { "type": "string" },
+                  "businessId": { "type": "integer" },
+                  "latitude": { "type": "number", "nullable": true },
+                  "longitude": { "type": "number", "nullable": true },
+                  "phone": { "type": "string", "nullable": true },
+                  "email": { "type": "string", "format": "email", "nullable": true },
+                  "isActive": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Location created" },
+          "400": { "description": "Invalid payload" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/locations/{location_id}": {
+      "parameters": [
+        { "name": "location_id", "in": "path", "required": true, "schema": { "type": "integer" } }
+      ],
+      "get": {
+        "operationId": "getLocationsLocationId",
+        "summary": "Get a location by ID",
+        "responses": {
+          "200": { "description": "Location found" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Location not found" }
+        }
+      },
+      "put": {
+        "operationId": "putLocationsLocationId",
+        "summary": "Update a location",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "city": { "type": "string" },
+                  "postalCode": { "type": "string" },
+                  "address": { "type": "string" },
+                  "businessId": { "type": "integer" },
+                  "latitude": { "type": "number", "nullable": true },
+                  "longitude": { "type": "number", "nullable": true },
+                  "phone": { "type": "string", "nullable": true },
+                  "email": { "type": "string", "format": "email", "nullable": true },
+                  "isActive": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Location updated" },
+          "400": { "description": "Invalid payload" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Location not found" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteLocationsLocationId",
+        "summary": "Delete a location",
+        "responses": {
+          "200": { "description": "Location deleted" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Location not found" }
         }
       }
     }

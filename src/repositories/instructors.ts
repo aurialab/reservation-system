@@ -3,18 +3,21 @@ import prisma from "../prisma/client";
 export type InstructorRecord = {
   id: number;
   name: string;
+  surname: string;
   email: string;
   phone: string;
 };
 
 export type CreateInstructorInput = {
   name: string;
+  surname: string;
   email: string;
   phone: string;
 };
 
 export type UpdateInstructorInput = {
   name?: string;
+  surname?: string;
   email?: string;
   phone?: string;
 };
@@ -35,6 +38,7 @@ export async function createInstructor(input: CreateInstructorInput): Promise<In
   return prisma.instructor.create({
     data: {
       name: input.name,
+      surname: input.surname,
       email: input.email,
       phone: input.phone
     }
@@ -54,6 +58,7 @@ export async function updateInstructorById(
     where: { id },
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
+      ...(input.surname !== undefined ? { surname: input.surname } : {}),
       ...(input.email !== undefined ? { email: input.email } : {}),
       ...(input.phone !== undefined ? { phone: input.phone } : {})
     }

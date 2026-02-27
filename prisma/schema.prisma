@@ -41,10 +41,11 @@ model Activity {
 }
 
 model Instructor {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
-  phone String
+  id      Int    @id @default(autoincrement())
+  name    String
+  surname String
+  email   String @unique
+  phone   String
 
   sessions Session[]
 }
@@ -53,16 +54,19 @@ model Session {
   id           Int      @id @default(autoincrement())
   activityId   Int
   instructorId Int
+  locationId   Int
   date         DateTime @db.Date
   startTime    String
   endTime      String
 
   activity     Activity      @relation(fields: [activityId], references: [id])
   instructor   Instructor    @relation(fields: [instructorId], references: [id])
+  location     Location      @relation(fields: [locationId], references: [id])
   reservations Reservation[]
 
   @@index([activityId])
   @@index([instructorId])
+  @@index([locationId])
   @@index([date])
 }
 
@@ -138,4 +142,38 @@ model Layer {
   latitude  Float
   longitude Float
   zone      String
+}
+
+enum BusinessStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Business {
+  id        Int            @id @default(autoincrement())
+  name      String
+  createdAt DateTime       @default(now())
+  status    BusinessStatus @default(ACTIVE)
+
+  locations Location[]
+}
+
+model Location {
+  id         Int      @id @default(autoincrement())
+  name       String
+  city       String
+  postalCode String
+  address    String
+  latitude   Float?
+  longitude  Float?
+  phone      String?
+  email      String?
+  isActive   Boolean  @default(true)
+  businessId Int
+
+  business Business  @relation(fields: [businessId], references: [id])
+  sessions Session[]
+
+  @@index([businessId])
 }

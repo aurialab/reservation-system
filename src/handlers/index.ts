@@ -57,6 +57,21 @@ import {
   deleteSessionsSessionId
 } from "./sessions";
 import { getLayers } from "./layers";
+import {
+  getBusinesses,
+  getBusinessesBusinessId,
+  postBusinesses,
+  putBusinessesBusinessId,
+  deleteBusinessesBusinessId
+} from "./business";
+import {
+  getLocations,
+  getLocationsLocationId,
+  getBusinessesBusinessIdLocations,
+  postLocations,
+  putLocationsLocationId,
+  deleteLocationsLocationId
+} from "./locations";
 
 export const notFound = (_context: Context, _req: Request, res: Response) => {
   res.status(404).json({
@@ -115,6 +130,17 @@ export const handlers: HandlerMap = {
   putSessionsSessionId,
   deleteSessionsSessionId,
   getLayers,
+  getBusinesses,
+  getBusinessesBusinessId,
+  postBusinesses,
+  putBusinessesBusinessId,
+  deleteBusinessesBusinessId,
+  getLocations,
+  getLocationsLocationId,
+  getBusinessesBusinessIdLocations,
+  postLocations,
+  putLocationsLocationId,
+  deleteLocationsLocationId,
   notFound,
   notImplemented
 };

@@ -13,6 +13,7 @@ import {
 export type Instructor = {
   id: number;
   name: string;
+  surname: string;
   email: string;
   phone: string;
 };
@@ -21,6 +22,7 @@ function toInstructor(record: InstructorRecord): Instructor {
   return {
     id: record.id,
     name: record.name,
+    surname: record.surname,
     email: record.email,
     phone: record.phone
   };

@@ -4,6 +4,7 @@ export type SessionRecord = {
   id: number;
   activityId: number;
   instructorId: number;
+  locationId: number;
   date: Date;
   startTime: string;
   endTime: string;
@@ -14,6 +15,7 @@ export type SessionRecord = {
 export type CreateSessionInput = {
   activityId: number;
   instructorId: number;
+  locationId: number;
   date: Date;
   startTime: string;
   endTime: string;
@@ -22,6 +24,7 @@ export type CreateSessionInput = {
 export type UpdateSessionInput = {
   activityId?: number;
   instructorId?: number;
+  locationId?: number;
   date?: Date;
   startTime?: string;
   endTime?: string;
@@ -73,6 +76,7 @@ export async function createSession(input: CreateSessionInput): Promise<SessionR
     data: {
       activityId: input.activityId,
       instructorId: input.instructorId,
+      locationId: input.locationId,
       date: input.date,
       startTime: input.startTime,
       endTime: input.endTime
@@ -95,6 +99,7 @@ export async function updateSessionById(
     data: {
       ...(input.activityId !== undefined ? { activityId: input.activityId } : {}),
       ...(input.instructorId !== undefined ? { instructorId: input.instructorId } : {}),
+      ...(input.locationId !== undefined ? { locationId: input.locationId } : {}),
       ...(input.date !== undefined ? { date: input.date } : {}),
       ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
       ...(input.endTime !== undefined ? { endTime: input.endTime } : {})

@@ -1,0 +1,550 @@
+{
+  "info": {
+    "name": "Reservation System API",
+    "description": "Postman collection for the Reservation System backend API. Set the `base_url` variable to your server (default: http://localhost:3000) and `token` to the JWT returned by login.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "JWT token returned by POST /auth/login. Set this after logging in.",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Joan\",\n  \"surname\": \"Puig\",\n  \"email\": \"joan@example.com\",\n  \"phone\": \"600111222\",\n  \"password\": \"secret1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('token', json.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joan@example.com\",\n  \"password\": \"secret1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Password Reset Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/password-reset", "host": ["{{base_url}}"], "path": ["auth", "password-reset"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joan@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Password Reset Confirm",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<reset-token>\",\n  \"newPassword\": \"newSecret1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email?token=<verification-token>",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-email"],
+              "query": [{ "key": "token", "value": "<verification-token>" }]
+            }
+          }
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/resend-verification", "host": ["{{base_url}}"], "path": ["auth", "resend-verification"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joan@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Me",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+        {
+          "name": "Delete My Account",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/me/notifications", "host": ["{{base_url}}"], "path": ["me", "notifications"] }
+          }
+        },
+        {
+          "name": "Register Push Notification Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/me/notifications/token", "host": ["{{base_url}}"], "path": ["me", "notifications", "token"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<push-notification-token>\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get My Reservations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/me/reservations", "host": ["{{base_url}}"], "path": ["me", "reservations"] }
+          }
+        },
+        {
+          "name": "Create My Reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/me/reservations", "host": ["{{base_url}}"], "path": ["me", "reservations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": 1,\n  \"observations\": \"Prefereixo lloc amb vista\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "List Activities",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/activities", "host": ["{{base_url}}"], "path": ["activities"] }
+          }
+        },
+        {
+          "name": "Create Activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/activities", "host": ["{{base_url}}"], "path": ["activities"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Yoga\",\n  \"description\": \"Classe de yoga per a tots els nivells\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Activity",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/activities/1", "host": ["{{base_url}}"], "path": ["activities", "1"] }
+          }
+        },
+        {
+          "name": "Update Activity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/activities/1", "host": ["{{base_url}}"], "path": ["activities", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Yoga Avançat\",\n  \"description\": \"Classe de yoga per a nivells avançats\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Activity",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/activities/1", "host": ["{{base_url}}"], "path": ["activities", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Instructors",
+      "item": [
+        {
+          "name": "List Instructors",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/instructors", "host": ["{{base_url}}"], "path": ["instructors"] }
+          }
+        },
+        {
+          "name": "Create Instructor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/instructors", "host": ["{{base_url}}"], "path": ["instructors"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maria Garcia\",\n  \"email\": \"maria@example.com\",\n  \"phone\": \"600222333\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Instructor",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/instructors/1", "host": ["{{base_url}}"], "path": ["instructors", "1"] }
+          }
+        },
+        {
+          "name": "Update Instructor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/instructors/1", "host": ["{{base_url}}"], "path": ["instructors", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"600999888\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Instructor",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/instructors/1", "host": ["{{base_url}}"], "path": ["instructors", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessions",
+      "item": [
+        {
+          "name": "List Sessions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/sessions",
+              "host": ["{{base_url}}"],
+              "path": ["sessions"],
+              "query": [
+                { "key": "activity_id", "value": "1", "disabled": true },
+                { "key": "instructor_id", "value": "1", "disabled": true },
+                { "key": "from", "value": "2026-03-01", "disabled": true },
+                { "key": "to", "value": "2026-03-31", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/sessions", "host": ["{{base_url}}"], "path": ["sessions"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityId\": 1,\n  \"instructorId\": 1,\n  \"date\": \"2026-03-15\",\n  \"startTime\": \"09:00\",\n  \"endTime\": \"11:00\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Session",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/sessions/1", "host": ["{{base_url}}"], "path": ["sessions", "1"] }
+          }
+        },
+        {
+          "name": "Update Session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/sessions/1", "host": ["{{base_url}}"], "path": ["sessions", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"10:00\",\n  \"endTime\": \"12:00\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Session",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/sessions/1", "host": ["{{base_url}}"], "path": ["sessions", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "List Reservations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/reservations",
+              "host": ["{{base_url}}"],
+              "path": ["reservations"],
+              "query": [
+                { "key": "user_id", "value": "1", "disabled": true },
+                { "key": "status", "value": "PENDING", "disabled": true, "description": "PENDING | APPROVED | REJECTED | CANCELLED" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Reservation (BO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/reservations", "host": ["{{base_url}}"], "path": ["reservations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"sessionId\": 1,\n  \"observations\": \"Nota del Back Office\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Get Reservation",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/reservations/1", "host": ["{{base_url}}"], "path": ["reservations", "1"] }
+          }
+        },
+        {
+          "name": "Update Reservation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/reservations/1", "host": ["{{base_url}}"], "path": ["reservations", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"observations\": \"Aprovada pel BO\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete Reservation",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/reservations/1", "host": ["{{base_url}}"], "path": ["reservations", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"] }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"name\": \"Joan\",\n  \"surname\": \"Puig\",\n  \"email\": \"joan@example.com\",\n  \"phone\": \"600111222\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"] }
+          }
+        },
+        {
+          "name": "Set User BO Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/setUserBo", "host": ["{{base_url}}"], "path": ["setUserBo"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"isBO\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] }
+          }
+        },
+        {
+          "name": "Send Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "token", "value": "{{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Missatge de notificació\",\n  \"users\": [1, 2, 3]\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Layers",
+      "item": [
+        {
+          "name": "List Layers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "token", "value": "{{token}}" }],
+            "url": { "raw": "{{base_url}}/layers", "host": ["{{base_url}}"], "path": ["layers"] }
+          }
+        }
+      ]
+    }
+  ]
+}
