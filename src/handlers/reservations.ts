@@ -108,7 +108,7 @@ function parseStatusFilter(value: unknown): ReservationStatus | null {
 
 function parseCreateReservationPayload(
   payload: unknown
-): { userId: number; sessionId: number; observations?: string } | null {
+): { userId: number; sessionId: number; occurrenceDate?: string; observations?: string } | null {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return null;
   }
@@ -132,16 +132,21 @@ function parseCreateReservationPayload(
     return null;
   }
 
+  if (data.occurrenceDate !== undefined && typeof data.occurrenceDate !== "string") {
+    return null;
+  }
+
   return {
     userId,
     sessionId,
-    observations: data.observations
+    occurrenceDate: typeof data.occurrenceDate === "string" ? data.occurrenceDate : undefined,
+    observations: data.observations as string | undefined
   };
 }
 
 function parseMeReservationPayload(
   payload: unknown
-): { sessionId: number; observations?: string } | null {
+): { sessionId: number; occurrenceDate?: string; observations?: string } | null {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return null;
   }
@@ -160,9 +165,14 @@ function parseMeReservationPayload(
     return null;
   }
 
+  if (data.occurrenceDate !== undefined && typeof data.occurrenceDate !== "string") {
+    return null;
+  }
+
   return {
     sessionId,
-    observations: data.observations
+    occurrenceDate: typeof data.occurrenceDate === "string" ? data.occurrenceDate : undefined,
+    observations: data.observations as string | undefined
   };
 }
 
@@ -407,7 +417,12 @@ export async function postReservations(
   // Validate payload and create reservation
   let reservation;
   try {
-    reservation = await createReservation(payload);
+    reservation = await createReservation({
+      userId: payload.userId,
+      sessionId: payload.sessionId,
+      occurrenceDate: payload.occurrenceDate,
+      observations: payload.observations
+    });
   } catch (error) {
     logger.error("Failed to create reservation", { error, payload });
     return res.status(500).json({ error: "SERVER_ERROR", message: "Error intern del servidor" });
@@ -418,7 +433,7 @@ export async function postReservations(
 
   // Send notifications (fail-safe: don't block creation if notifications fail)
   try {
-    const sessionDate = reservation.session?.date ?? "";
+    const sessionDate = reservation.occurrenceDate ?? "";
     const activityName = reservation.session?.activity?.name ?? "";
     await notifyReservationCreated(
       payload.userId,
@@ -499,6 +514,7 @@ export async function postMeReservations(
     reservation = await createReservation({
       userId,
       sessionId: body.sessionId,
+      occurrenceDate: body.occurrenceDate,
       observations: body.observations
     });
   } catch (error) {
@@ -511,7 +527,7 @@ export async function postMeReservations(
 
   // Send notifications (fail-safe: don't block creation if notifications fail)
   try {
-    const sessionDate = reservation.session?.date ?? "";
+    const sessionDate = reservation.occurrenceDate ?? "";
     const activityName = reservation.session?.activity?.name ?? "";
     await notifyReservationCreated(
       userId,
@@ -602,7 +618,7 @@ export async function putReservationsReservationId(
   // If status changed to CANCELLED, send notifications (fail-safe)
   if (payload.status === "CANCELLED" && existingReservation.state.status !== "CANCELLED") {
     try {
-      const sessionDate = existingReservation.session?.date ?? "";
+      const sessionDate = existingReservation.occurrenceDate ?? "";
       const activityName = existingReservation.session?.activity?.name ?? "";
       await notifyReservationCancelled(
         existingReservation.userId,
@@ -662,7 +678,7 @@ export async function deleteReservationsReservationId(
 
   // Send notifications (fail-safe: don't block deletion if notifications fail)
   try {
-    const sessionDate = existingReservation.session?.date ?? "";
+    const sessionDate = existingReservation.occurrenceDate ?? "";
     const activityName = existingReservation.session?.activity?.name ?? "";
     await notifyReservationCancelled(
       existingReservation.userId,

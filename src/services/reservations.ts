@@ -13,7 +13,6 @@ import { logger } from "./logger";
 
 export type ReservationSession = {
   id: number;
-  date: string;
   startTime: string;
   endTime: string;
   activity?: { id: number; name: string; description: string | null };
@@ -24,6 +23,7 @@ export type Reservation = {
   id: number;
   userId: number;
   sessionId: number;
+  occurrenceDate?: string;
   session?: ReservationSession;
   user?: { name: string; surname: string };
   observations?: string;
@@ -33,6 +33,7 @@ export type Reservation = {
 export type CreateReservationPayload = {
   userId: number;
   sessionId: number;
+  occurrenceDate?: string;
   observations?: string;
 };
 
@@ -40,7 +41,6 @@ function toReservation(record: ReservationRecord): Reservation {
   const session = record.session
     ? {
         id: record.session.id,
-        date: record.session.date.toISOString().slice(0, 10),
         startTime: record.session.startTime,
         endTime: record.session.endTime,
         activity: record.session.activity,
@@ -52,6 +52,7 @@ function toReservation(record: ReservationRecord): Reservation {
     id: record.id,
     userId: record.userId,
     sessionId: record.sessionId,
+    occurrenceDate: record.occurrenceDate ? record.occurrenceDate.toISOString().slice(0, 10) : undefined,
     session,
     user: record.user ? { name: record.user.name, surname: record.user.surname } : undefined,
     observations: record.observations ?? undefined,
@@ -76,9 +77,22 @@ export async function getReservationById(
 export async function createReservation(
   payload: CreateReservationPayload
 ): Promise<Reservation | null> {
+  let parsedOccurrenceDate: Date | null = null;
+  if (payload.occurrenceDate) {
+    const match = payload.occurrenceDate.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) {
+      return null;
+    }
+    parsedOccurrenceDate = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    if (Number.isNaN(parsedOccurrenceDate.getTime())) {
+      return null;
+    }
+  }
+
   const input: CreateReservationInput = {
     userId: payload.userId,
     sessionId: payload.sessionId,
+    occurrenceDate: parsedOccurrenceDate,
     observations: payload.observations
   };
 

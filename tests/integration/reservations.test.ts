@@ -125,7 +125,6 @@ const mockedDeleteReservationById = vi.mocked(deleteReservationById);
 
 const mockSession = {
   id: 5,
-  date: new Date("2026-01-10T00:00:00.000Z"),
   startTime: "09:00",
   endTime: "11:00",
   activity: { id: 1, name: "Yoga", description: null },
@@ -134,7 +133,6 @@ const mockSession = {
 
 const expectedSession = {
   id: 5,
-  date: "2026-01-10",
   startTime: "09:00",
   endTime: "11:00",
   activity: { id: 1, name: "Yoga", description: null },
@@ -158,6 +156,7 @@ describe("reservations endpoints", () => {
         id: 1,
         userId: 2,
         sessionId: 5,
+        occurrenceDate: null,
         session: mockSession,
         observations: "Note",
         state: "APPROVED"
@@ -199,6 +198,7 @@ describe("reservations endpoints", () => {
       id: 4,
       userId: 3,
       sessionId: 5,
+      occurrenceDate: null,
       session: mockSession,
       observations: "Testing",
       state: "PENDING"
@@ -222,6 +222,7 @@ describe("reservations endpoints", () => {
     expect(mockedCreateReservation).toHaveBeenCalledWith({
       userId: 3,
       sessionId: 5,
+      occurrenceDate: null,
       observations: "Testing"
     });
   });
@@ -232,6 +233,7 @@ describe("reservations endpoints", () => {
       id: 7,
       userId: 4,
       sessionId: 5,
+      occurrenceDate: null,
       session: mockSession,
       observations: null,
       state: "APPROVED"
@@ -258,6 +260,7 @@ describe("reservations endpoints", () => {
       id: 9,
       userId: 5,
       sessionId: 5,
+      occurrenceDate: null,
       session: mockSession,
       observations: null,
       state: "APPROVED"
@@ -280,6 +283,7 @@ describe("reservations endpoints", () => {
         id: 10,
         userId: 9,
         sessionId: 5,
+        occurrenceDate: null,
         session: mockSession,
         observations: "Personal",
         state: "PENDING"
@@ -311,6 +315,7 @@ describe("reservations endpoints", () => {
       id: 12,
       userId: 6,
       sessionId: 5,
+      occurrenceDate: null,
       session: mockSession,
       observations: "",
       state: "PENDING"

@@ -9,6 +9,7 @@ import {
   listSessions as listSessionRecords,
   updateSessionById
 } from "../repositories/sessions";
+import { type WeekDay } from "@prisma/client";
 
 export type SessionActivity = {
   id: number;
@@ -28,7 +29,9 @@ export type Session = {
   activityId: number;
   instructorId: number;
   locationId: number;
-  date: string;
+  startDate: string;
+  endDate: string;
+  weekDays: string[];
   startTime: string;
   endTime: string;
   activity?: SessionActivity;
@@ -39,7 +42,9 @@ export type CreateSessionPayload = {
   activityId: number;
   instructorId: number;
   locationId: number;
-  date: string;
+  startDate: string;
+  endDate: string;
+  weekDays: string[];
   startTime: string;
   endTime: string;
 };
@@ -48,7 +53,9 @@ export type UpdateSessionPayload = {
   activityId?: number;
   instructorId?: number;
   locationId?: number;
-  date?: string;
+  startDate?: string;
+  endDate?: string;
+  weekDays?: string[];
   startTime?: string;
   endTime?: string;
 };
@@ -59,7 +66,9 @@ function toSession(record: SessionRecord): Session {
     activityId: record.activityId,
     instructorId: record.instructorId,
     locationId: record.locationId,
-    date: record.date.toISOString().slice(0, 10),
+    startDate: record.startDate.toISOString().slice(0, 10),
+    endDate: record.endDate.toISOString().slice(0, 10),
+    weekDays: record.weekDays,
     startTime: record.startTime,
     endTime: record.endTime,
     activity: record.activity,
@@ -103,8 +112,17 @@ export async function getSessionById(id: number): Promise<Session | null> {
 }
 
 export async function createSession(payload: CreateSessionPayload): Promise<Session | null> {
-  const parsedDate = parseDate(payload.date);
-  if (!parsedDate) {
+  const parsedStartDate = parseDate(payload.startDate);
+  if (!parsedStartDate) {
+    return null;
+  }
+
+  const parsedEndDate = parseDate(payload.endDate);
+  if (!parsedEndDate) {
+    return null;
+  }
+
+  if (parsedStartDate > parsedEndDate) {
     return null;
   }
 
@@ -112,7 +130,9 @@ export async function createSession(payload: CreateSessionPayload): Promise<Sess
     activityId: payload.activityId,
     instructorId: payload.instructorId,
     locationId: payload.locationId,
-    date: parsedDate,
+    startDate: parsedStartDate,
+    endDate: parsedEndDate,
+    weekDays: payload.weekDays as WeekDay[],
     startTime: payload.startTime,
     endTime: payload.endTime
   };
@@ -136,12 +156,22 @@ export async function updateSession(
   if (payload.locationId !== undefined) {
     updateInput.locationId = payload.locationId;
   }
-  if (payload.date !== undefined) {
-    const parsedDate = parseDate(payload.date);
-    if (!parsedDate) {
+  if (payload.startDate !== undefined) {
+    const parsed = parseDate(payload.startDate);
+    if (!parsed) {
       return null;
     }
-    updateInput.date = parsedDate;
+    updateInput.startDate = parsed;
+  }
+  if (payload.endDate !== undefined) {
+    const parsed = parseDate(payload.endDate);
+    if (!parsed) {
+      return null;
+    }
+    updateInput.endDate = parsed;
+  }
+  if (payload.weekDays !== undefined) {
+    updateInput.weekDays = payload.weekDays as WeekDay[];
   }
   if (payload.startTime !== undefined) {
     updateInput.startTime = payload.startTime;

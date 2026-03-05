@@ -15,6 +15,16 @@ enum ReservationStatus {
   CANCELLED
 }
 
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   email        String        @unique
@@ -51,11 +61,13 @@ model Instructor {
 }
 
 model Session {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   activityId   Int
   instructorId Int
   locationId   Int
-  date         DateTime @db.Date
+  startDate    DateTime  @db.Date
+  endDate      DateTime  @db.Date
+  weekDays     WeekDay[]
   startTime    String
   endTime      String
 
@@ -67,21 +79,24 @@ model Session {
   @@index([activityId])
   @@index([instructorId])
   @@index([locationId])
-  @@index([date])
+  @@index([startDate])
+  @@index([endDate])
 }
 
 model Reservation {
-  id           Int               @id @default(autoincrement())
-  userId       Int
-  sessionId    Int
-  observations String?
-  state        ReservationStatus @default(PENDING)
+  id             Int               @id @default(autoincrement())
+  userId         Int
+  sessionId      Int
+  occurrenceDate DateTime?         @db.Date
+  observations   String?
+  state          ReservationStatus @default(PENDING)
 
   user    User    @relation(fields: [userId], references: [id])
   session Session @relation(fields: [sessionId], references: [id])
 
   @@index([userId])
   @@index([sessionId])
+  @@index([occurrenceDate])
 }
 
 model Notification {

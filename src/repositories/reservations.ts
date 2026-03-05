@@ -7,7 +7,6 @@ const includeRelations = {
   session: {
     select: {
       id: true,
-      date: true,
       startTime: true,
       endTime: true,
       activity: { select: { id: true, name: true, description: true } },
@@ -20,9 +19,9 @@ export type ReservationRecord = {
   id: number;
   userId: number;
   sessionId: number;
+  occurrenceDate: Date | null;
   session?: {
     id: number;
-    date: Date;
     startTime: string;
     endTime: string;
     activity?: { id: number; name: string; description: string | null };
@@ -36,6 +35,7 @@ export type ReservationRecord = {
 export type CreateReservationInput = {
   userId: number;
   sessionId: number;
+  occurrenceDate?: Date | null;
   observations?: string | null;
 };
 
@@ -73,6 +73,7 @@ export async function createReservation(
     data: {
       userId: input.userId,
       sessionId: input.sessionId,
+      occurrenceDate: input.occurrenceDate ?? null,
       observations: input.observations ?? null
     },
     include: includeRelations

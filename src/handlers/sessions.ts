@@ -93,11 +93,29 @@ function parseDateFilter(value: unknown): Date | null {
   return date;
 }
 
+const VALID_WEEK_DAYS = new Set([
+  "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"
+]);
+
+function parseWeekDays(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length === 0) {
+    return null;
+  }
+  for (const day of value) {
+    if (typeof day !== "string" || !VALID_WEEK_DAYS.has(day)) {
+      return null;
+    }
+  }
+  return value as string[];
+}
+
 function parseCreatePayload(payload: unknown): {
   activityId: number;
   instructorId: number;
   locationId: number;
-  date: string;
+  startDate: string;
+  endDate: string;
+  weekDays: string[];
   startTime: string;
   endTime: string;
 } | null {
@@ -119,7 +137,16 @@ function parseCreatePayload(payload: unknown): {
     return null;
   }
 
-  if (typeof data.date !== "string" || !data.date.trim()) {
+  if (typeof data.startDate !== "string" || !data.startDate.trim()) {
+    return null;
+  }
+
+  if (typeof data.endDate !== "string" || !data.endDate.trim()) {
+    return null;
+  }
+
+  const weekDays = parseWeekDays(data.weekDays);
+  if (!weekDays) {
     return null;
   }
 
@@ -135,7 +162,9 @@ function parseCreatePayload(payload: unknown): {
     activityId: data.activityId,
     instructorId: data.instructorId,
     locationId: data.locationId,
-    date: data.date.trim(),
+    startDate: data.startDate.trim(),
+    endDate: data.endDate.trim(),
+    weekDays,
     startTime: data.startTime.trim(),
     endTime: data.endTime.trim()
   };
@@ -144,7 +173,10 @@ function parseCreatePayload(payload: unknown): {
 function parseUpdatePayload(payload: unknown): {
   activityId?: number;
   instructorId?: number;
-  date?: string;
+  locationId?: number;
+  startDate?: string;
+  endDate?: string;
+  weekDays?: string[];
   startTime?: string;
   endTime?: string;
 } | null {
@@ -157,7 +189,9 @@ function parseUpdatePayload(payload: unknown): {
     activityId?: number;
     instructorId?: number;
     locationId?: number;
-    date?: string;
+    startDate?: string;
+    endDate?: string;
+    weekDays?: string[];
     startTime?: string;
     endTime?: string;
   } = {};
@@ -183,11 +217,26 @@ function parseUpdatePayload(payload: unknown): {
     result.locationId = data.locationId;
   }
 
-  if (data.date !== undefined) {
-    if (typeof data.date !== "string" || !data.date.trim()) {
+  if (data.startDate !== undefined) {
+    if (typeof data.startDate !== "string" || !data.startDate.trim()) {
       return null;
     }
-    result.date = data.date.trim();
+    result.startDate = data.startDate.trim();
+  }
+
+  if (data.endDate !== undefined) {
+    if (typeof data.endDate !== "string" || !data.endDate.trim()) {
+      return null;
+    }
+    result.endDate = data.endDate.trim();
+  }
+
+  if (data.weekDays !== undefined) {
+    const weekDays = parseWeekDays(data.weekDays);
+    if (!weekDays) {
+      return null;
+    }
+    result.weekDays = weekDays;
   }
 
   if (data.startTime !== undefined) {

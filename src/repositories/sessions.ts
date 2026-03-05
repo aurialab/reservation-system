@@ -1,3 +1,4 @@
+import { type WeekDay } from "@prisma/client";
 import prisma from "../prisma/client";
 
 export type SessionRecord = {
@@ -5,7 +6,9 @@ export type SessionRecord = {
   activityId: number;
   instructorId: number;
   locationId: number;
-  date: Date;
+  startDate: Date;
+  endDate: Date;
+  weekDays: WeekDay[];
   startTime: string;
   endTime: string;
   activity?: { id: number; name: string; description: string | null };
@@ -16,7 +19,9 @@ export type CreateSessionInput = {
   activityId: number;
   instructorId: number;
   locationId: number;
-  date: Date;
+  startDate: Date;
+  endDate: Date;
+  weekDays: WeekDay[];
   startTime: string;
   endTime: string;
 };
@@ -25,7 +30,9 @@ export type UpdateSessionInput = {
   activityId?: number;
   instructorId?: number;
   locationId?: number;
-  date?: Date;
+  startDate?: Date;
+  endDate?: Date;
+  weekDays?: WeekDay[];
   startTime?: string;
   endTime?: string;
 };
@@ -45,22 +52,15 @@ const includeRelations = {
 export async function listSessions(filters: SessionFilters = {}): Promise<SessionRecord[]> {
   const { activityId, instructorId, fromDate, toDate } = filters;
 
-  const dateFilter: { gte?: Date; lte?: Date } = {};
-  if (fromDate) {
-    dateFilter.gte = fromDate;
-  }
-  if (toDate) {
-    dateFilter.lte = toDate;
-  }
-
   return prisma.session.findMany({
     where: {
       ...(activityId ? { activityId } : {}),
       ...(instructorId ? { instructorId } : {}),
-      ...(Object.keys(dateFilter).length > 0 ? { date: dateFilter } : {})
+      ...(fromDate ? { endDate: { gte: fromDate } } : {}),
+      ...(toDate ? { startDate: { lte: toDate } } : {})
     },
     include: includeRelations,
-    orderBy: [{ date: "asc" }, { startTime: "asc" }]
+    orderBy: [{ startDate: "asc" }, { startTime: "asc" }]
   });
 }
 
@@ -77,7 +77,9 @@ export async function createSession(input: CreateSessionInput): Promise<SessionR
       activityId: input.activityId,
       instructorId: input.instructorId,
       locationId: input.locationId,
-      date: input.date,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      weekDays: input.weekDays,
       startTime: input.startTime,
       endTime: input.endTime
     },
@@ -100,7 +102,9 @@ export async function updateSessionById(
       ...(input.activityId !== undefined ? { activityId: input.activityId } : {}),
       ...(input.instructorId !== undefined ? { instructorId: input.instructorId } : {}),
       ...(input.locationId !== undefined ? { locationId: input.locationId } : {}),
-      ...(input.date !== undefined ? { date: input.date } : {}),
+      ...(input.startDate !== undefined ? { startDate: input.startDate } : {}),
+      ...(input.endDate !== undefined ? { endDate: input.endDate } : {}),
+      ...(input.weekDays !== undefined ? { weekDays: input.weekDays } : {}),
       ...(input.startTime !== undefined ? { startTime: input.startTime } : {}),
       ...(input.endTime !== undefined ? { endTime: input.endTime } : {})
     },

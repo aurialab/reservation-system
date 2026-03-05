@@ -2906,7 +2906,9 @@
                   "activityId",
                   "instructorId",
                   "locationId",
-                  "date",
+                  "startDate",
+                  "endDate",
+                  "weekDays",
                   "startTime",
                   "endTime"
                 ],
@@ -2920,9 +2922,24 @@
                   "locationId": {
                     "type": "integer"
                   },
-                  "date": {
+                  "startDate": {
                     "type": "string",
-                    "format": "date"
+                    "format": "date",
+                    "description": "First day the session is active (YYYY-MM-DD)"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Last day the session is active (YYYY-MM-DD)"
+                  },
+                  "weekDays": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
+                    },
+                    "minItems": 1,
+                    "description": "Days of the week when the session takes place"
                   },
                   "startTime": {
                     "type": "string",
@@ -2995,9 +3012,21 @@
                   "locationId": {
                     "type": "integer"
                   },
-                  "date": {
+                  "startDate": {
                     "type": "string",
                     "format": "date"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "weekDays": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
+                    },
+                    "minItems": 1
                   },
                   "startTime": {
                     "type": "string"
@@ -3582,7 +3611,7 @@
         }
       },
       "CreateReservationRequest": {
-        "title": "Root Type for CreateBookingRequest",
+        "title": "Root Type for CreateReservationRequest",
         "description": "",
         "type": "object",
         "properties": {
@@ -3590,14 +3619,15 @@
             "format": "int32",
             "type": "integer"
           },
-          "date": {
-            "format": "date",
-            "type": "string"
-          },
-          "timeRangeId": {
+          "sessionId": {
             "format": "int32",
             "type": "integer",
-            "description": "ID del rango horario"
+            "description": "ID of the recurring session"
+          },
+          "occurrenceDate": {
+            "format": "date",
+            "type": "string",
+            "description": "Specific date of the occurrence to reserve (YYYY-MM-DD)"
           },
           "observations": {
             "type": "string"
@@ -3605,8 +3635,8 @@
         },
         "example": {
           "userId": 1,
-          "date": "2026-01-30",
-          "timeRangeId": 2,
+          "sessionId": 2,
+          "occurrenceDate": "2026-03-04",
           "observations": "some text"
         }
       },
@@ -3615,22 +3645,23 @@
         "description": "",
         "type": "object",
         "properties": {
-          "date": {
-            "format": "date",
-            "type": "string"
-          },
-          "timeRangeId": {
+          "sessionId": {
             "format": "int32",
             "type": "integer",
-            "description": "ID del rango horario"
+            "description": "ID of the recurring session"
+          },
+          "occurrenceDate": {
+            "format": "date",
+            "type": "string",
+            "description": "Specific date of the occurrence to reserve (YYYY-MM-DD)"
           },
           "observations": {
             "type": "string"
           }
         },
         "example": {
-          "date": "2026-01-30",
-          "timeRangeId": 2,
+          "sessionId": 2,
+          "occurrenceDate": "2026-03-04",
           "observations": "some text"
         }
       },

@@ -119,7 +119,6 @@ const mockedSendReservationCancelledEmail = vi.mocked(sendReservationCancelledEm
 
 const mockSession = {
   id: 2,
-  date: "2026-02-15",
   startTime: "12:00",
   endTime: "15:00",
   activity: { id: 1, name: "Yoga", description: null },
@@ -154,6 +153,7 @@ describe("reservations notifications and security", () => {
       id: 10,
       userId: 7,
       sessionId: 2,
+      occurrenceDate: "2026-02-15",
       session: mockSession,
       observations: "obs",
       state: { status: "PENDING" }
@@ -166,6 +166,7 @@ describe("reservations notifications and security", () => {
       .send({
         userId: 999,
         sessionId: 2,
+        occurrenceDate: "2026-02-15",
         observations: "obs"
       });
 
@@ -173,6 +174,7 @@ describe("reservations notifications and security", () => {
     expect(mockedCreateReservation).toHaveBeenCalledWith({
       userId: 7,
       sessionId: 2,
+      occurrenceDate: "2026-02-15",
       observations: "obs"
     });
     expect(mockedSendNotifications).toHaveBeenCalledWith({
@@ -212,7 +214,6 @@ describe("reservations notifications and security", () => {
     const app = createApp();
     const reservationSession = {
       id: 3,
-      date: "2026-02-16",
       startTime: "15:00",
       endTime: "18:00",
       activity: { id: 2, name: "Pilates", description: null },
@@ -222,6 +223,7 @@ describe("reservations notifications and security", () => {
       id: 9,
       userId: 8,
       sessionId: 3,
+      occurrenceDate: "2026-02-16",
       session: reservationSession,
       observations: undefined,
       state: { status: "APPROVED" }
@@ -230,6 +232,7 @@ describe("reservations notifications and security", () => {
       id: 9,
       userId: 8,
       sessionId: 3,
+      occurrenceDate: "2026-02-16",
       session: reservationSession,
       observations: undefined,
       state: { status: "CANCELLED" }
