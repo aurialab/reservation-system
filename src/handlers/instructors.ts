@@ -24,6 +24,115 @@ const invalidPayloadError = {
   message: "Invalid payload"
 };
 
+type InstructorScheduleInput = {
+  day: number;
+  hours: [string, string][];
+};
+
+type InstructorHolidayInput = {
+  startDay: string;
+  endDay: string;
+  startHour: string;
+  endHour: string;
+};
+
+const hourPattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const datePattern = /^(?:\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})$/;
+
+function parseScheduleValue(value: unknown): InstructorScheduleInput[] | null {
+  if (value === null) {
+    return null;
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const schedule: InstructorScheduleInput[] = [];
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return null;
+    }
+
+    const item = entry as Record<string, unknown>;
+    if (!Number.isInteger(item.day) || (item.day as number) < 1 || (item.day as number) > 7) {
+      return null;
+    }
+
+    if (!Array.isArray(item.hours)) {
+      return null;
+    }
+
+    const hours: [string, string][] = [];
+    for (const rawInterval of item.hours) {
+      if (!Array.isArray(rawInterval) || rawInterval.length !== 2) {
+        return null;
+      }
+
+      const [start, end] = rawInterval;
+      if (typeof start !== "string" || typeof end !== "string") {
+        return null;
+      }
+
+      if (!hourPattern.test(start) || !hourPattern.test(end) || start >= end) {
+        return null;
+      }
+
+      hours.push([start, end]);
+    }
+
+    schedule.push({ day: item.day as number, hours });
+  }
+
+  return schedule;
+}
+
+function parseHolidaysValue(value: unknown): InstructorHolidayInput[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const holidays: InstructorHolidayInput[] = [];
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return null;
+    }
+
+    const item = entry as Record<string, unknown>;
+    if (
+      typeof item.startDay !== "string" ||
+      typeof item.endDay !== "string" ||
+      typeof item.startHour !== "string" ||
+      typeof item.endHour !== "string"
+    ) {
+      return null;
+    }
+
+    if (
+      !datePattern.test(item.startDay) ||
+      !datePattern.test(item.endDay) ||
+      !hourPattern.test(item.startHour) ||
+      !hourPattern.test(item.endHour)
+    ) {
+      return null;
+    }
+
+    if (item.startHour >= item.endHour) {
+      return null;
+    }
+
+    holidays.push({
+      startDay: item.startDay,
+      endDay: item.endDay,
+      startHour: item.startHour,
+      endHour: item.endHour
+    });
+  }
+
+  return holidays;
+}
+
 function requireAuth(req: Request, res: Response) {
   const payload = getAuthPayload(req.headers.token);
   if (!payload) {
@@ -50,7 +159,14 @@ function parseInstructorId(context: Context): number | null {
 
 function parseCreatePayload(
   payload: unknown
-): { name: string; surname: string; email: string; phone: string } | null {
+): {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  schedule: InstructorScheduleInput[] | null;
+  holidays: InstructorHolidayInput[];
+} | null {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return null;
   }
@@ -72,23 +188,59 @@ function parseCreatePayload(
     return null;
   }
 
+  let schedule: InstructorScheduleInput[] | null = null;
+  if (data.schedule !== undefined) {
+    const parsedSchedule = parseScheduleValue(data.schedule);
+    if (parsedSchedule === null && data.schedule !== null) {
+      return null;
+    }
+
+    schedule = parsedSchedule;
+  }
+
+  let holidays: InstructorHolidayInput[] = [];
+  if (data.holidays !== undefined) {
+    const parsedHolidays = parseHolidaysValue(data.holidays);
+    if (!parsedHolidays) {
+      return null;
+    }
+
+    holidays = parsedHolidays;
+  }
+
   return {
     name: data.name.trim(),
     surname: data.surname.trim(),
     email: data.email.trim(),
-    phone: data.phone.trim()
+    phone: data.phone.trim(),
+    schedule,
+    holidays
   };
 }
 
 function parseUpdatePayload(
   payload: unknown
-): { name?: string; surname?: string; email?: string; phone?: string } | null {
+): {
+  name?: string;
+  surname?: string;
+  email?: string;
+  phone?: string;
+  schedule?: InstructorScheduleInput[] | null;
+  holidays?: InstructorHolidayInput[];
+} | null {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return null;
   }
 
   const data = payload as Record<string, unknown>;
-  const result: { name?: string; surname?: string; email?: string; phone?: string } = {};
+  const result: {
+    name?: string;
+    surname?: string;
+    email?: string;
+    phone?: string;
+    schedule?: InstructorScheduleInput[] | null;
+    holidays?: InstructorHolidayInput[];
+  } = {};
 
   if (data.name !== undefined) {
     if (typeof data.name !== "string" || !data.name.trim()) {
@@ -116,6 +268,24 @@ function parseUpdatePayload(
       return null;
     }
     result.phone = data.phone.trim();
+  }
+
+  if (data.schedule !== undefined) {
+    const parsedSchedule = parseScheduleValue(data.schedule);
+    if (parsedSchedule === null && data.schedule !== null) {
+      return null;
+    }
+
+    result.schedule = parsedSchedule;
+  }
+
+  if (data.holidays !== undefined) {
+    const parsedHolidays = parseHolidaysValue(data.holidays);
+    if (!parsedHolidays) {
+      return null;
+    }
+
+    result.holidays = parsedHolidays;
   }
 
   if (Object.keys(result).length === 0) {

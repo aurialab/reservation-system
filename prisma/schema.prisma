@@ -51,13 +51,23 @@ model Activity {
 }
 
 model Instructor {
-  id      Int    @id @default(autoincrement())
-  name    String
-  surname String
-  email   String @unique
-  phone   String
+  id       Int   @id @default(autoincrement())
+  name     String
+  surname  String
+  email    String @unique
+  phone    String
+  schedule Json?
+  holidays Json   @default("[]")
 
   sessions Session[]
+  services Service[]
+}
+
+model Service {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  instructors Instructor[]
 }
 
 model Session {

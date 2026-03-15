@@ -2737,6 +2737,64 @@
                   },
                   "phone": {
                     "type": "string"
+                  },
+                  "schedule": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "day",
+                        "hours"
+                      ],
+                      "properties": {
+                        "day": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 7
+                        },
+                        "hours": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {
+                              "type": "string",
+                              "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "nullable": true
+                  },
+                  "holidays": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "startDay",
+                        "endDay",
+                        "startHour",
+                        "endHour"
+                      ],
+                      "properties": {
+                        "startDay": {
+                          "type": "string"
+                        },
+                        "endDay": {
+                          "type": "string"
+                        },
+                        "startHour": {
+                          "type": "string",
+                          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        "endHour": {
+                          "type": "string",
+                          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -2804,6 +2862,64 @@
                   },
                   "phone": {
                     "type": "string"
+                  },
+                  "schedule": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "day",
+                        "hours"
+                      ],
+                      "properties": {
+                        "day": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 7
+                        },
+                        "hours": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {
+                              "type": "string",
+                              "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "nullable": true
+                  },
+                  "holidays": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "startDay",
+                        "endDay",
+                        "startHour",
+                        "endHour"
+                      ],
+                      "properties": {
+                        "startDay": {
+                          "type": "string"
+                        },
+                        "endDay": {
+                          "type": "string"
+                        },
+                        "startHour": {
+                          "type": "string",
+                          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        "endHour": {
+                          "type": "string",
+                          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -2837,6 +2953,141 @@
           },
           "404": {
             "description": "Instructor not found"
+          }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "operationId": "getServices",
+        "summary": "List all services",
+        "responses": {
+          "200": {
+            "description": "List of services"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postServices",
+        "summary": "Create a new service",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "instructorIds"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "instructorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Service created"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/services/{service_id}": {
+      "parameters": [
+        {
+          "name": "service_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getServicesServiceId",
+        "summary": "Get a service by ID",
+        "responses": {
+          "200": {
+            "description": "Service found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Service not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putServicesServiceId",
+        "summary": "Update a service",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "instructorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Service updated"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Service not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteServicesServiceId",
+        "summary": "Delete a service",
+        "responses": {
+          "200": {
+            "description": "Service deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Service not found"
           }
         }
       }

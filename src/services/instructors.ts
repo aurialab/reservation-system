@@ -1,5 +1,7 @@
 import {
   type InstructorRecord,
+  type InstructorSchedule,
+  type InstructorHoliday,
   type CreateInstructorInput,
   type UpdateInstructorInput,
   createInstructor as createInstructorRecord,
@@ -16,6 +18,8 @@ export type Instructor = {
   surname: string;
   email: string;
   phone: string;
+  schedule: InstructorSchedule[] | null;
+  holidays: InstructorHoliday[];
 };
 
 function toInstructor(record: InstructorRecord): Instructor {
@@ -24,7 +28,9 @@ function toInstructor(record: InstructorRecord): Instructor {
     name: record.name,
     surname: record.surname,
     email: record.email,
-    phone: record.phone
+    phone: record.phone,
+    schedule: record.schedule,
+    holidays: record.holidays
   };
 }
 

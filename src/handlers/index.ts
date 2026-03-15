@@ -50,6 +50,13 @@ import {
   deleteInstructorsInstructorId
 } from "./instructors";
 import {
+  getServices,
+  getServicesServiceId,
+  postServices,
+  putServicesServiceId,
+  deleteServicesServiceId
+} from "./services";
+import {
   getSessions,
   getSessionsSessionId,
   postSessions,
@@ -124,6 +131,11 @@ export const handlers: HandlerMap = {
   postInstructors,
   putInstructorsInstructorId,
   deleteInstructorsInstructorId,
+  getServices,
+  getServicesServiceId,
+  postServices,
+  putServicesServiceId,
+  deleteServicesServiceId,
   getSessions,
   getSessionsSessionId,
   postSessions,
